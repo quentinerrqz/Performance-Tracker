@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+@layer utilities {
+  .width-constrained {
+    width: min(90%, 24rem);
+  }
+}
