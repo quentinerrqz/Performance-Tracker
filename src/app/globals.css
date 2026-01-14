@@ -4,4 +4,13 @@
   .width-constrained {
     width: min(90%, 24rem);
   }
+  .circle-button-blue {
+    @apply bg-blue-500/10 rounded-full flex items-center justify-center aspect-square text-2xl font-mono hover:bg-blue-500/20 active:bg-blue-500/30 transition;
+  }
+  .circle-button-red {
+    @apply bg-red-500/10 rounded-full flex items-center justify-center aspect-square text-2xl font-mono hover:bg-red-500/20 active:bg-red-500/30 transition;
+  }
+  .circle-button-white {
+    @apply bg-white/10 rounded-full flex items-center justify-center aspect-square text-2xl font-mono hover:bg-white/20 active:bg-white/30 transition;
+  }
 }
