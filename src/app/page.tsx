@@ -13,7 +13,7 @@ export default function Home() {
   );
 
   return (
-    <div className="flex h-svh items-center justify-center flex-col overflow-hidden dark:bg-black dark:text-white">
+    <div className="flex h-dvh items-center justify-center flex-col overflow-hidden dark:bg-black dark:text-white">
       <div className="width-constrained h-[90%] border flex flex-col items-center rounded-lg bg-white/5 dark:bg-black/5 border-gray-300 dark:border-gray-600">
         <div className="flex-1 p-2 w-full">
           {/* visible output */}
