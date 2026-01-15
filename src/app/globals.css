@@ -13,4 +13,7 @@
   .circle-button-white {
     @apply bg-white/10 rounded-full flex items-center justify-center aspect-square text-2xl font-mono hover:bg-white/20 active:bg-white/30 transition;
   }
+  .circle-button-last {
+    @apply bg-white/50 rounded-full flex items-center justify-center aspect-square text-2xl font-mono transition;
+  }
 }

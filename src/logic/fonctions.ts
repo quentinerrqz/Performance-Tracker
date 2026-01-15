@@ -1,3 +1,5 @@
+// Math-related utility functions
+
 export const factorial = (n: number): number => {
   if (n < 0) {
     throw new Error("Factorial is not defined for negative numbers");
@@ -11,4 +13,7 @@ export const factorial = (n: number): number => {
   }
   return result;
 };
+
+// operation-related utility functions
+
 
