@@ -1,16 +1,12 @@
 "use client";
 import { Calculatrice } from "@/logic/calculatrice";
 import { operators, touches } from "@/logic/constantes";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export default function Home() {
-  const [output, setOutput] = useState<string>("");
+  const [output, setOutput] = useState<string>("0");
   const [lastOperator, setLastOperator] = useState<string | null>(null);
-
-  const calculatrice = new Calculatrice(
-    [output, setOutput],
-    [lastOperator, setLastOperator]
-  );
+  const calculatrice = useRef(new Calculatrice(setOutput, setLastOperator));
 
   return (
     <div className="flex h-dvh items-center justify-center flex-col overflow-hidden dark:bg-black dark:text-white">
@@ -23,34 +19,37 @@ export default function Home() {
             id="output"
             className="w-full h-full bg-white/10 p-2 rounded resize-none border border-gray-300 dark:bg-black dark:border-gray-600"
             value={output}
-            placeholder="Try me !"
-          ></textarea>
+          />
         </div>
         {/* buttons */}
         <div className="w-full flex-2 p-3 flex items-center border-t border-gray-300 dark:border-gray-600">
           <div className="h-full flex-3 grid grid-cols-3 gap-2 p-2">
             <button
-              onClick={() => calculatrice.deleteLast()}
+              onClick={() => calculatrice.current.deleteLast()}
               className="circle-button-red"
             >
               {`<x`}
             </button>
             <button
-              onClick={() => calculatrice.deleteAll()}
+              onClick={() => calculatrice.current.deleteAll()}
               className="circle-button-red"
             >
               {`C`}
             </button>
             <button
-              onClick={() => calculatrice.updateInput(`%`)}
-              className="circle-button-red"
+              onClick={() => calculatrice.current.updateInput(`%`)}
+              className={` ${
+                lastOperator === `%`
+                  ? "circle-button-last"
+                  : "circle-button-blue"
+              }`}
             >
-              {`%`}
+              {`mod`}
             </button>
             {touches.map((touch) => (
               <button
                 key={touch}
-                onClick={() => calculatrice.updateInput(touch)}
+                onClick={() => calculatrice.current.updateInput(touch)}
                 className="circle-button-white"
               >
                 {touch}
@@ -58,23 +57,25 @@ export default function Home() {
             ))}
           </div>
           <div className="h-full flex-1 grid grid-cols-1 gap-2 p-2">
-            {operators.map((operator) => (
-              <button
-                key={operator}
-                onClick={
-                  operator == `=`
-                    ? () => calculatrice.calculate()
-                    : () => calculatrice.updateInput(operator)
-                }
-                className={` ${
-                  lastOperator === operator
-                    ? "circle-button-last"
-                    : "circle-button-blue"
-                }`}
-              >
-                {operator}
-              </button>
-            ))}
+            {operators
+              .filter((operator) => operator !== `%`)
+              .map((operator) => (
+                <button
+                  key={operator}
+                  onClick={
+                    operator === `=`
+                      ? () => calculatrice.current.calculate()
+                      : () => calculatrice.current.updateInput(operator)
+                  }
+                  className={` ${
+                    lastOperator === operator
+                      ? "circle-button-last"
+                      : "circle-button-blue"
+                  }`}
+                >
+                  {operator}
+                </button>
+              ))}
           </div>
         </div>
       </div>

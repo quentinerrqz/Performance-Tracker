@@ -1,91 +1,148 @@
+import { operators } from "./constantes";
+
 export class Calculatrice {
   private lastOperator: string | null = null;
-  input: string = "";
-  output: string = "";
-  private setOutput: React.Dispatch<React.SetStateAction<string>>;
   private setLastOperator: React.Dispatch<React.SetStateAction<string | null>>;
+  input: string = "0";
+
+  private setOutput: React.Dispatch<React.SetStateAction<string>>;
 
   constructor(
-    [output, setOutput]: [string, React.Dispatch<React.SetStateAction<string>>],
-    [lastOperator, setLastOperator]: [
-      string | null,
-      React.Dispatch<React.SetStateAction<string | null>>
-    ]
+    setOutput: React.Dispatch<React.SetStateAction<string>>,
+    setLastOperator: React.Dispatch<React.SetStateAction<string | null>>
   ) {
-    this.output = output;
-    this.lastOperator = lastOperator;
     this.setOutput = setOutput;
     this.setLastOperator = setLastOperator;
   }
 
+  private formatInput(input: string): string {
+    return input.replace(/÷/g, "/").replace(/×/g, "*");
+  }
+
   updateInput(value: string | number) {
-    console.log("Updating input with value:", value);
-    if (this.preventDualOperators(value)) return;
+    const tokens = this.input.split(/([\+\-\*\/\%])/);
+    const lastToken = tokens[tokens.length - 1];
+    if (
+      [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].includes(value as number) &&
+      lastToken === "0"
+    ) {
+      this.input = this.input.slice(0, -1) + value.toString();
+      this.setOutput(this.formatInput(this.input));
+      return;
+    }
 
-    if (typeof value === "string" && this.switchSign(value)) return;
+    if (operators.includes(value as string)) {
+      if (this.preventDualOperators(value as string)) return;
+    } else {
+      this.lastOperator = null;
+      this.setLastOperator(this.lastOperator);
+      if ([0, 1, 2, 3, 4, 5, 6, 7, 8, 9].includes(value as number)) {
+      }
+    }
 
-    this.output += value;
-    this.setOutput(this.output);
+    if (value === "+/-" && this.switchSign()) return;
+
+    this.input += value;
+    this.setOutput(this.formatInput(this.input));
   }
 
   calculate() {
-    if (this.output.trim() === "") {
+    if (this.input.trim() === "") {
       this.showAlert("Error: Empty Expression");
       return;
     }
     try {
-      const result = eval(this.output);
-      this.output = result.toString();
-      this.setOutput(this.output);
+      const result = eval(this.input);
+      this.input = result.toString();
+      this.setOutput(this.formatInput(this.input));
     } catch (error) {
       this.showAlert("Error: Invalid Expression");
     }
   }
 
   deleteLast() {
-    this.output = this.output.slice(0, -1);
-    this.setOutput(this.output);
+    if (this.input.length <= 1) {
+      this.deleteAll();
+      return;
+    }
+
+    this.input = this.input.slice(0, -1);
+    this.setOutput(this.formatInput(this.input));
+    if (operators.includes(this.input.slice(-1))) {
+      if (
+        this.input.slice(-1) === "-" &&
+        operators.includes(this.input[this.input.length - 2])
+      ) {
+        this.lastOperator = this.input[this.input.length - 2];
+        this.input = this.input.slice(0, -1);
+        this.setOutput(this.formatInput(this.input));
+      }
+      this.lastOperator = this.input.slice(-1);
+      this.setLastOperator(this.lastOperator);
+    } else {
+      this.lastOperator = null;
+      this.setLastOperator(this.lastOperator);
+    }
   }
 
   deleteAll() {
-    this.output = "";
-    this.setOutput(this.output);
+    this.input = "0";
+    this.setOutput("0");
+    this.lastOperator = null;
+    this.setLastOperator(this.lastOperator);
   }
 
   showAlert(alert: string) {
-    this.output = "";
     this.setOutput(alert);
   }
 
-  preventDualOperators(value: string | number): boolean {
-    const newOperator =
-      typeof value === "string" && ["+", "-", "*", "/"].includes(value)
-        ? value
-        : null;
-    this.setLastOperator(newOperator);
-    if (newOperator && this.lastOperator) {
-      this.output = this.output.slice(0, -1) + newOperator;
-      this.setOutput(this.output);
+  preventDualOperators(newOperator: string): boolean {
+    if (this.lastOperator === null) {
+      this.lastOperator = newOperator;
+      this.setLastOperator(newOperator);
+      return false;
+    } else if (newOperator !== this.lastOperator) {
+      this.input = this.input.slice(0, -1) + newOperator;
+      this.setOutput(this.formatInput(this.input));
+      this.lastOperator = newOperator;
+      this.setLastOperator(newOperator);
       return true;
     }
-    return false;
+    return true;
   }
 
-  switchSign(value: string): boolean {
-    if (value === "+/-") {
-      const tokens = this.output.split(/([\+\-\*\/])/);
-      const lastToken = tokens[tokens.length - 1];
-      if (lastToken) {
-        if (lastToken.startsWith("-")) {
-          tokens[tokens.length - 1] = lastToken.slice(1);
+  switchSign(): true {
+    const tokens = this.input.split(/([\+\-\*\/\%])/);
+    const lastToken = tokens[tokens.length - 1];
+    const previousToken = tokens.length > 1 ? tokens[tokens.length - 2] : null;
+
+    if (lastToken !== "") {
+      if (previousToken === "-") {
+        if (tokens[tokens.length - 3] === "") {
+          tokens.splice(tokens.length - 2, 1);
         } else {
-          tokens[tokens.length - 1] = "-" + lastToken;
+          tokens[tokens.length - 2] = "+";
         }
-        this.output = tokens.join("");
-        this.setOutput(this.output);
+      } else if (previousToken === "+") {
+        tokens[tokens.length - 2] = "-";
+      } else if (operators.includes(previousToken as string)) {
+        tokens[tokens.length - 1] = "-" + lastToken;
+      } else if (previousToken === null) {
+        tokens[tokens.length - 1] = "-" + lastToken;
       }
-      return true;
+    } else {
+      if (operators.includes(previousToken as string)) {
+        if (previousToken === "-") {
+          tokens[tokens.length - 2] = "+1";
+        } else if (previousToken === "+") {
+          tokens[tokens.length - 2] = "-1";
+        } else {
+          tokens.push("-1");
+        }
+      }
     }
-    return false;
+    this.input = tokens.join("");
+    this.setOutput(this.formatInput(this.input));
+    return true;
   }
 }

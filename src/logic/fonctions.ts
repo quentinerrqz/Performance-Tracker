@@ -14,6 +14,6 @@ export const factorial = (n: number): number => {
   return result;
 };
 
-// operation-related utility functions
+
 
 
