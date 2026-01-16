@@ -1,4 +1,5 @@
 "use client";
+import { formatedOperators } from "@/logic/affichage";
 import { Calculatrice } from "@/logic/calculatrice";
 import { operators, touches } from "@/logic/constantes";
 import { useRef, useState } from "react";
@@ -73,7 +74,7 @@ export default function Home() {
                       : "circle-button-blue"
                   }`}
                 >
-                  {operator}
+                  {operator === `=` ? operator : formatedOperators[operator]}
                 </button>
               ))}
           </div>

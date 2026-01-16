@@ -1,3 +1,4 @@
+import { formatedOperators } from "./affichage";
 import { operators } from "./constantes";
 
 export class Calculatrice {
@@ -16,12 +17,22 @@ export class Calculatrice {
   }
 
   private formatInput(input: string): string {
-    return input.replace(/÷/g, "/").replace(/×/g, "*");
+    let inputFormatted = input;
+    for (const i in formatedOperators) {
+      inputFormatted = inputFormatted.replace(
+        new RegExp(`\\${i}`, "g"),
+        formatedOperators[i as keyof typeof formatedOperators]
+      );
+    }
+    return inputFormatted;
   }
 
   updateInput(value: string | number) {
     const tokens = this.input.split(/([\+\-\*\/\%])/);
     const lastToken = tokens[tokens.length - 1];
+    if (value === "." && (lastToken.includes(".") || lastToken === "")) {
+      return;
+    }
     if (
       [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].includes(value as number) &&
       lastToken === "0"
